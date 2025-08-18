@@ -7,9 +7,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     build: {
-      chunkSizeWarningLimit: 1200, rollupOptions: {
-        external: ['axios']
-      }
+      chunkSizeWarningLimit: 1200,
     },
   }
 });
