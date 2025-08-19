@@ -5,7 +5,7 @@ const initialState = {
   tasks: { tasks: [], total: 0 },
   loading: false,
   error: null,
-  query: { page: 1, limit: 5, filter: 'all', sort: 'asc' },
+  query: { page: 1, limit: 5, filter: 'all', sort: 'asc', search: '' },
 };
 
 const taskReducer = (state, action) => {
@@ -30,11 +30,11 @@ export const TaskProvider = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
 
   const fetchTasks = async () => {
-    const { page, limit, filter, sort } = state.query;
+    const { page, limit, filter, sort, search } = state.query;
     dispatch({ type: 'FETCH_START' });
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/tasks`, {
-        params: { page, limit, filter, sort },
+        params: { page, limit, filter, sort, search },
       });
       dispatch({ type: 'FETCH_SUCCESS', payload: res.data });
     } catch (e) {
@@ -44,7 +44,6 @@ export const TaskProvider = ({ children }) => {
 
   useEffect(() => {
     fetchTasks();
-    // eslint-disable-next-line
   }, [state.query]);
 
   const setQuery = (payload) => dispatch({ type: 'SET_QUERY', payload });

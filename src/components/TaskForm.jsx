@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import React, { useState } from "react";
 import {
   Box,
@@ -11,9 +10,11 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { useTaskContext } from "../context/TaskContext";
+import { useSnackbar } from "../context/SnackbarProvider";
 
 const TaskForm = () => {
   const { fetchTasks } = useTaskContext();
+  const { showMessage } = useSnackbar();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
@@ -33,8 +34,9 @@ const TaskForm = () => {
       setDescription("");
       fetchTasks();
       setError("");
-    } catch {
-      setError("Failed to add task.");
+      showMessage("Task added successfully!", "success");
+    } catch (error) {
+      showMessage(`${error.message}`, "error");
     }
   };
 
@@ -62,7 +64,6 @@ const TaskForm = () => {
             error={Boolean(error)}
             helperText={error}
           />
-
           <TextField
             label="Task Description"
             fullWidth
@@ -71,7 +72,6 @@ const TaskForm = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-
           <Button
             type="submit"
             variant="contained"
@@ -82,7 +82,6 @@ const TaskForm = () => {
               borderRadius: 3,
               px: 3,
               textTransform: "none",
-              ":hover": { boxShadow: "0 3px 12px rgba(0,0,0,0.2)" },
             }}
           >
             Add Task
@@ -92,4 +91,5 @@ const TaskForm = () => {
     </Paper>
   );
 };
+
 export default TaskForm;

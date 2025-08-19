@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ListItem,
   ListItemText,
@@ -7,15 +7,22 @@ import {
   Paper,
   Stack,
   Fade,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import { useTaskContext } from "../context/TaskContext";
+import { useSnackbar } from "../context/SnackbarProvider";
 
 const Task = ({ id, title, description, completed, createdAt }) => {
   const { fetchTasks } = useTaskContext();
+  const { showMessage } = useSnackbar();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const updateStatus = async () => {
     try {
@@ -23,8 +30,9 @@ const Task = ({ id, title, description, completed, createdAt }) => {
         completed: !completed,
       });
       fetchTasks();
-    } catch (err) {
-      console.error("Failed to update task:", err);
+      showMessage(`Task marked as ${completed ? "incomplete" : "completed"}`, "info");
+    } catch (error) {
+      showMessage(`${error.message}`, "error");
     }
   };
 
@@ -32,76 +40,83 @@ const Task = ({ id, title, description, completed, createdAt }) => {
     try {
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/tasks/${id}`);
       fetchTasks();
-    } catch (err) {
-      console.error("Failed to delete task:", err);
+      showMessage("Task deleted successfully", "success");
+    } catch (error) {
+      showMessage(`${error.message}`, "error");
     }
   };
 
   return (
-    <Fade in>
-      <Paper
-        variant="outlined"
-        sx={{
-          mb: 1.5,
-          p: 1.8,
-          borderRadius: 3,
-          bgcolor: completed ? "success.light" : "grey.50",
-          display: "flex",
-          alignItems: "center",
-          transition: "0.3s",
-          "&:hover": { boxShadow: 4 },
-        }}
-      >
-        <IconButton
-          edge="start"
-          color={completed ? "primary" : "default"}
-          onClick={updateStatus}
-          sx={{ mr: 1 }}
+    <>
+      <Fade in>
+        <Paper
+          variant="outlined"
+          sx={{
+            mb: 1.5,
+            p: 1.8,
+            borderRadius: 3,
+            bgcolor: completed ? "success.light" : "grey.50",
+            display: "flex",
+            alignItems: "center",
+            transition: "0.3s",
+            "&:hover": { boxShadow: 4 },
+          }}
         >
-          {completed ? (
-            <CheckCircleOutlineIcon />
-          ) : (
-            <RadioButtonUncheckedIcon />
-          )}
-        </IconButton>
+          <IconButton
+            edge="start"
+            color={completed ? "primary" : "default"}
+            onClick={updateStatus}
+            sx={{ mr: 1 }}
+          >
+            {completed ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
+          </IconButton>
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <IconButton
-              edge="end"
-              aria-label="delete"
-              onClick={removeTask}
-              color="error"
-            >
-              <DeleteIcon />
-            </IconButton>
-          }
-        >
-          <ListItemText
-            primary={
-              <Typography
-                variant="subtitle1"
-                fontWeight="medium"
-                sx={{ textDecoration: completed ? "line-through" : "none" }}
+          <ListItem
+            disablePadding
+            secondaryAction={
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={() => setConfirmOpen(true)}
+                color="error"
               >
-                {title}
-              </Typography>
+                <DeleteIcon />
+              </IconButton>
             }
-            secondary={
-              <Stack spacing={0.5}>
-                {description && (
-                  <Typography variant="body2">{description}</Typography>
-                )}
-                <Typography variant="caption" color="text.secondary">
-                  {new Date(createdAt).toLocaleString()}
+          >
+            <ListItemText
+              primary={
+                <Typography
+                  variant="subtitle1"
+                  fontWeight="medium"
+                  sx={{ textDecoration: completed ? "line-through" : "none" }}
+                >
+                  {title}
                 </Typography>
-              </Stack>
-            }
-          />
-        </ListItem>
-      </Paper>
-    </Fade>
+              }
+              secondary={
+                <Stack spacing={0.5}>
+                  {description && <Typography variant="body2">{description}</Typography>}
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(createdAt).toLocaleString()}
+                  </Typography>
+                </Stack>
+              }
+            />
+          </ListItem>
+        </Paper>
+      </Fade>
+
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Are you sure you want to delete this task?</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={removeTask} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 export default Task;
