@@ -32,7 +32,7 @@ const Task = ({ id, title, description, completed, createdAt }) => {
       fetchTasks();
       showMessage(`Task marked as ${completed ? "incomplete" : "completed"}`, "info");
     } catch (error) {
-      showMessage(`${error.message}`, "error");
+      showMessage(`${error?.response?.data?.message}`, "error");
     }
   };
 
@@ -42,7 +42,7 @@ const Task = ({ id, title, description, completed, createdAt }) => {
       fetchTasks();
       showMessage("Task deleted successfully", "success");
     } catch (error) {
-      showMessage(`${error.message}`, "error");
+      showMessage(`${error?.response?.data?.message}`, "error");
     }
   };
 

@@ -36,7 +36,7 @@ const TaskForm = () => {
       setError("");
       showMessage("Task added successfully!", "success");
     } catch (error) {
-      showMessage(`${error.message}`, "error");
+      showMessage(`${error?.response?.data?.message}`, "error");
     }
   };
 
